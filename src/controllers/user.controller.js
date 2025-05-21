@@ -4,7 +4,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { oauth2client } from "../utils/googleConfig.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
 
 const generateAccessAndRefreshTokens = async (userId) => {
   // find user
@@ -30,26 +31,77 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
+// const loginWithGoogle = asyncHandler(async (req, res) => {
+//   const { code } = req.query;
+//   if (!code) {
+//     throw new ApiError(401, "Google Client Code is required");
+//   }
+//   const googleRes = await oauth2client.getToken(code);
+//   oauth2client.setCredentials(googleRes.tokens);
+
+//   const userRes = await axios.get(
+//     `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
+//   );
+
+//   const { email, name, picture } = userRes.data;
+//   let user = await User.findOne({ email });
+//   if (!user) {
+//     user = await User.create({
+//       userName: name,
+//       email,
+//       avatar: picture,
+//     });
+//   }
+//   const { _id } = user;
+
+//   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+//     _id
+//   );
+
+//   const loggedInUser = await User.findById(_id).select(
+//     "-password -refreshToken"
+//   );
+
+//   // send cookies
+//   const options = {
+//     httpOnly: true,
+//     secure: true,
+//   };
+//   return res
+//     .status(200)
+//     .cookie("accessToken", accessToken, options)
+//     .cookie("refreshToken", refreshToken, options)
+//     .json(
+//       new ApiResponse(
+//         200,
+//         {
+//           user: loggedInUser,
+//           accessToken,
+//           refreshToken,
+//         },
+//         "User loggedIn Successfully"
+//       )
+//     );
+// });
+
 const loginWithGoogle = asyncHandler(async (req, res) => {
-  const { code } = req.query;
+  const code = req.query.code;
+  if (!code) throw new ApiError(401, "Google Client Code is required");
+
   const googleRes = await oauth2client.getToken(code);
   oauth2client.setCredentials(googleRes.tokens);
 
   const userRes = await axios.get(
     `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
   );
-
   const { email, name, picture } = userRes.data;
+
   let user = await User.findOne({ email });
   if (!user) {
-    user = await User.create({
-      userName: name,
-      email,
-      avatar: picture,
-    });
+    user = await User.create({ userName: name, email, avatar: picture });
   }
-  const { _id } = user;
 
+  const { _id } = user;
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     _id
   );
@@ -58,26 +110,31 @@ const loginWithGoogle = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
-  // send cookies
-  const options = {
+  const cookieOptions = {
     httpOnly: true,
+    // secure: process.env.NODE_ENV === "production",
     secure: true,
+    sameSite: "strict",
   };
-  return res
+
+  res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
       new ApiResponse(
         200,
-        {
-          user: loggedInUser,
-          accessToken,
-          refreshToken,
-        },
-        "User loggedIn Successfully"
+        { user: loggedInUser, accessToken, refreshToken },
+        "User logged in successfully"
       )
     );
 });
 
-export { loginWithGoogle };
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = req.user;
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "current user fetched successfully"));
+});
+
+export { loginWithGoogle, getCurrentUser };

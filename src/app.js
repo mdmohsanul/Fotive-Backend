@@ -24,7 +24,7 @@ app.use(express.static("public"));
 // to read and set cookie to browser
 app.use(cookieParser());
 
-// routes
+// ---------- routes -------------------
 
 import userRouter from "./routes/user.routes.js";
 
