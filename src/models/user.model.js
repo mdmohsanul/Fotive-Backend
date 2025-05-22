@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
+      default:
+        "https://res.cloudinary.com/dkidipx7j/image/upload/v1747821647/istockphoto-1495088043-612x612-removebg-preview_mv3akq.webp",
     },
     password: {
       type: String,
