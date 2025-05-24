@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -6,6 +7,12 @@ dotenv.config();
 
 const userSchema = new mongoose.Schema(
   {
+    userId :{
+      type:String,
+      default:uuidv4,
+      required:true,
+      unique:true
+    },
     userName: {
       type: String,
       required: [true, "Username is required"],

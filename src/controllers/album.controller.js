@@ -61,6 +61,8 @@ const updateDescription = asyncHandler(async(req,res) => {
         "Album description updated successfully"
     ))
 })
+
+// add a single user at a time
  const addUsersToAlbum = asyncHandler(async (req,res) => {
    // accepts a single email as string
     const {sharedUsers} = req.body;
@@ -84,6 +86,15 @@ const updateDescription = asyncHandler(async(req,res) => {
         "Users added successfully"
     ))
  })
+
+const deleteAlbum = asyncHandler(async(req,res) => {
+    const {albumId} = req.body;
+    if(!albumId){
+        throw new ApiError(400,"Album Id not found")
+    }
+    const associtedImages = await Image.({albumId:albumId})
+
+})
 
 export {createAlbum,updateDescription,addUsersToAlbum}
 

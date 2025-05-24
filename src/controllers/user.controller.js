@@ -190,6 +190,16 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "current user fetched successfully"));
 });
 
+const  getAllUsers = asyncHandler(async (req,res) => {
+    const user = await User.find().select("-password -refreshToken")
+      return res.status(200).json(new ApiResponse(
+        200,
+        user,
+        "All users fetched successfuly"
+      ))
+
+})
+
 const logoutUser = asyncHandler(async (req, res) => {
   // get userId
   // remove accesstoken from database
@@ -234,6 +244,8 @@ const changeCurrentUserPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 
+
+
 export {
   loginWithGoogle,
   getCurrentUser,
@@ -241,4 +253,5 @@ export {
   registerUser,
   loginUser,
   changeCurrentUserPassword,
+  getAllUsers
 };
