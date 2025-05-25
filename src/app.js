@@ -28,9 +28,11 @@ app.use(cookieParser());
 
 import userRouter from "./routes/user.routes.js";
 import albumRouter from "./routes/album.routes.js";
+import imageRouter from "./routes/images.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/albums", albumRouter);
+app.use("/api/v1/albums", imageRouter);
 
 export { app };

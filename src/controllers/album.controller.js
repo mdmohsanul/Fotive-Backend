@@ -87,14 +87,28 @@ const updateDescription = asyncHandler(async(req,res) => {
     ))
  })
 
-const deleteAlbum = asyncHandler(async(req,res) => {
-    const {albumId} = req.body;
-    if(!albumId){
-        throw new ApiError(400,"Album Id not found")
-    }
-    const associtedImages = await Image.({albumId:albumId})
 
-})
 
-export {createAlbum,updateDescription,addUsersToAlbum}
+ const deleteAlbum = asyncHandler(async (req, res) => {
+   const { albumId } = req.params;
+
+   if (!albumId) {
+     throw new ApiError(400, "Album Id not provided");
+   }
+
+   const deletionResult = await Album.deleteOne({ albumId: albumId });
+
+   if (deletionResult.deletedCount === 0) {
+     throw new ApiError(404, "No album found with the given ID");
+   }
+
+   // delete associated images
+   await Image.deleteMany({ albumId });
+
+   return res
+     .status(200)
+     .json(new ApiResponse(200, {}, "Album deleted successfully"));
+ });
+
+ export { createAlbum, updateDescription, addUsersToAlbum, deleteAlbum };
 
