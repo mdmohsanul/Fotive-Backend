@@ -5,12 +5,15 @@ import {
   addUsersToAlbum,
   createAlbum,
   deleteAlbum,
+  getAllAlbums,
   updateDescription,
 } from "../controllers/album.controller.js";
 
 const router = Router();
 
 router.route("/createAlbum").post(verifyJWT, createAlbum);
+router.route("/").get(verifyJWT, getAllAlbums);
+
 // router.route("/listAlbum").get(verifyJWT,lis)
 router.route("/:albumId").patch(updateDescription);
 router.route("/:albumId/share").patch(addUsersToAlbum);
