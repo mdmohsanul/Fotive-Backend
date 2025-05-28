@@ -122,6 +122,16 @@ const getAllImagesByAlbumId = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, images, "images fetched successfully"));
 });
 
+// getAll images
+const getAllImages = asyncHandler(async (req,res) => {
+  const images = await Image.find()
+  return res.status(200).json(new ApiResponse(
+    200,
+    images,
+    "All images fetched successfullt"
+  ))
+})
+
 const getFavoriteImages = asyncHandler(async (req, res) => {
   const { albumId } = req.params;
   const favoriteImages = await Image.find({
@@ -140,4 +150,5 @@ export {
   deleteImage,
   getAllImagesByAlbumId,
   getFavoriteImages,
+  getAllImages
 };

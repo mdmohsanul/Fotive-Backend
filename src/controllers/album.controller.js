@@ -2,6 +2,7 @@ import { Album } from "../models/album.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Image } from "../models/image.model.js";
 
 const createAlbum = asyncHandler(async (req, res) => {
   const owner = req.user._id;
@@ -9,7 +10,12 @@ const createAlbum = asyncHandler(async (req, res) => {
   if (!name || name.trim() === "") {
     throw new ApiError(401, "Album name is required");
   }
-  //  const owner = req.user._id
+
+  const isSameName = await Album.findOne({ name });
+
+  if (isSameName) {
+    throw new ApiError(401, "This name is already taken");
+  }
 
   const album = await Album.create({
     name,
@@ -33,8 +39,9 @@ const getAllAlbums = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, albums, "Albums fetched successfully"));
 });
 
-const updateDescription = asyncHandler(async (req, res) => {
-  const { description } = req.body;
+const updateData = asyncHandler(async (req, res) => {
+  const { description, name } = req.body;
+  console.log(description, name);
   const { albumId } = req.params;
   if (!albumId) {
     throw new ApiError(400, "AlbumId is required");
@@ -46,13 +53,14 @@ const updateDescription = asyncHandler(async (req, res) => {
   const album = await Album.findOneAndUpdate(
     { albumId: albumId },
     {
-      $set: { description },
+      $set: { description, name },
     },
     { new: true }
   );
   if (!album) {
     throw new ApiError(404, "Album not found or unauthorized");
   }
+  console.log(album);
 
   return res
     .status(200)
@@ -98,18 +106,16 @@ const deleteAlbum = asyncHandler(async (req, res) => {
   }
 
   // delete associated images
-  await Image.deleteMany({ albumId });
+  const findImages = await Image.find({ albumId });
+  console.log(findImages);
+  if (findImages.length > 0) {
+    await Image.deleteMany({ albumId });
+  }
 
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "Album deleted successfully"));
 });
 
-export {
-  createAlbum,
-  updateDescription,
-  addUsersToAlbum,
-  deleteAlbum,
-  getAllAlbums,
-};
+export { createAlbum, updateData, addUsersToAlbum, deleteAlbum, getAllAlbums };
 

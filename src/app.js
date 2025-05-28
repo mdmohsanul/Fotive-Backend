@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+import { errorHandler } from "./utils/errorHandler.js";
 const app = express();
 
 const corsOptions = {
@@ -35,4 +36,5 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/albums", albumRouter);
 app.use("/api/v1/albums", imageRouter);
 
+app.use(errorHandler);
 export { app };

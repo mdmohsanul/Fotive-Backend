@@ -7,11 +7,11 @@ dotenv.config();
 
 const userSchema = new mongoose.Schema(
   {
-    userId :{
-      type:String,
-      default:uuidv4,
-      required:true,
-      unique:true
+    userId: {
+      type: String,
+      default: uuidv4,
+      required: true,
+      unique: true,
     },
     userName: {
       type: String,
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
       default:
-        "https://res.cloudinary.com/dkidipx7j/image/upload/v1747821647/istockphoto-1495088043-612x612-removebg-preview_mv3akq.webp",
+        "https://res.cloudinary.com/dkidipx7j/image/upload/v1748357192/user_profile_gql76f.webp",
     },
     password: {
       type: String,
