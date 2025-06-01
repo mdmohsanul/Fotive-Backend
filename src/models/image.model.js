@@ -18,8 +18,10 @@ const imageSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    person: {
-      type: String, // we can later give reference to User
+    userId: {
+      type: String,
+      ref: "User",
+      required: true,
     },
     tags: [
       {

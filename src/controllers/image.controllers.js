@@ -11,6 +11,8 @@ const uploadImage = asyncHandler(async (req, res) => {
   // validations
   // cloudinary save
   const { albumId } = req.params;
+  const userId = req.user.userId;
+
   const { tags, isFavorite, commentText } = req.body;
   const file = req.file;
   if (!file) {
@@ -46,9 +48,15 @@ const uploadImage = asyncHandler(async (req, res) => {
     name: originalname.split(".")[0],
     imageUrl: uploadedImage?.url,
     tags,
-    isFavorite,
+    isFavorite: Boolean(isFavorite),
+    userId,
     size: size / (1024 * 1024),
-    comments: { user: req.user._id, text: commentText },
+    comments: [
+      {
+        user: req.user._id,
+        text: commentText,
+      },
+    ],
   });
   return res
     .status(201)
@@ -113,6 +121,7 @@ const deleteImage = asyncHandler(async (req, res) => {
 
 const getAllImagesByAlbumId = asyncHandler(async (req, res) => {
   const { albumId } = req.params;
+  console.log(albumId);
   if (!albumId) {
     throw new ApiError(400, "Album id is required");
   }
@@ -123,14 +132,19 @@ const getAllImagesByAlbumId = asyncHandler(async (req, res) => {
 });
 
 // getAll images
-const getAllImages = asyncHandler(async (req,res) => {
-  const images = await Image.find()
-  return res.status(200).json(new ApiResponse(
-    200,
-    images,
-    "All images fetched successfullt"
-  ))
-})
+const getAllImagesByUserId = asyncHandler(async (req, res) => {
+  const user = req.user.userId;
+  const { userId } = req.params;
+
+  if (user !== userId) {
+    throw new ApiError(401, "Login user and the userId sent is different");
+  }
+  const images = await Image.find({ userId: userId });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, images, "All images fetched successfully"));
+});
 
 const getFavoriteImages = asyncHandler(async (req, res) => {
   const { albumId } = req.params;
@@ -150,5 +164,5 @@ export {
   deleteImage,
   getAllImagesByAlbumId,
   getFavoriteImages,
-  getAllImages
+  getAllImagesByUserId,
 };

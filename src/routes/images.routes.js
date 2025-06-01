@@ -4,8 +4,8 @@ import { upload } from "../middlewares/multer.js";
 import {
   deleteImage,
   favoriteImage,
-  getAllImages,
   getAllImagesByAlbumId,
+  getAllImagesByUserId,
   getFavoriteImages,
   updateComment,
   uploadImage,
@@ -26,8 +26,8 @@ router
 
 router.route("/:albumId/images/:imageId").delete(verifyJWT, deleteImage);
 
-router.route("/images").get(verifyJWT, getAllImages);
 router.route("/:albumId/images").get(verifyJWT, getAllImagesByAlbumId);
+router.route("/user/:userId/images").get(verifyJWT, getAllImagesByUserId);
 router.route("/:albumId/images/favorites").get(verifyJWT, getFavoriteImages);
 
 export default router;

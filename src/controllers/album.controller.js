@@ -41,7 +41,7 @@ const getAllAlbums = asyncHandler(async (req, res) => {
 
 const updateData = asyncHandler(async (req, res) => {
   const { description, name } = req.body;
-  console.log(description, name);
+
   const { albumId } = req.params;
   if (!albumId) {
     throw new ApiError(400, "AlbumId is required");
@@ -60,7 +60,7 @@ const updateData = asyncHandler(async (req, res) => {
   if (!album) {
     throw new ApiError(404, "Album not found or unauthorized");
   }
-  console.log(album);
+
 
   return res
     .status(200)
@@ -107,7 +107,7 @@ const deleteAlbum = asyncHandler(async (req, res) => {
 
   // delete associated images
   const findImages = await Image.find({ albumId });
-  console.log(findImages);
+
   if (findImages.length > 0) {
     await Image.deleteMany({ albumId });
   }
