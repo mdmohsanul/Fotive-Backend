@@ -64,7 +64,9 @@ const uploadImage = asyncHandler(async (req, res) => {
 });
 
 const favoriteImage = asyncHandler(async (req, res) => {
+  console.log(req.body);
   const { isFavorite } = req.body;
+  console.log(isFavorite);
   const { imageId } = req.params;
   const user = req.user.userId;
   const image = await Image.findOne({ imageId, userId: user });
