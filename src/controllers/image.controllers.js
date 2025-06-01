@@ -66,8 +66,8 @@ const uploadImage = asyncHandler(async (req, res) => {
 const favoriteImage = asyncHandler(async (req, res) => {
   const { isFavorite } = req.body;
   const { imageId } = req.params;
-
-  const image = await Image.findOne({ imageId });
+  const user = req.user.userId;
+  const image = await Image.findOne({ imageId, userId: user });
 
   if (!image) {
     throw new ApiError(404, "Image not found");
@@ -119,7 +119,7 @@ const deleteImage = asyncHandler(async (req, res) => {
 
 // get all images for a particular albumId
 
-const getAllImagesByAlbumId = asyncHandler(async (req, res) => {
+const imagesByAlbumId = asyncHandler(async (req, res) => {
   const { albumId } = req.params;
   console.log(albumId);
   if (!albumId) {
@@ -132,7 +132,7 @@ const getAllImagesByAlbumId = asyncHandler(async (req, res) => {
 });
 
 // getAll images
-const getAllImagesByUserId = asyncHandler(async (req, res) => {
+const imagesByUserId = asyncHandler(async (req, res) => {
   const user = req.user.userId;
   const { userId } = req.params;
 
@@ -146,7 +146,7 @@ const getAllImagesByUserId = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, images, "All images fetched successfully"));
 });
 
-const getFavoriteImages = asyncHandler(async (req, res) => {
+const favoriteImagesInAlbum = asyncHandler(async (req, res) => {
   const { albumId } = req.params;
   const favoriteImages = await Image.find({
     albumId,
@@ -157,12 +157,22 @@ const getFavoriteImages = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, favoriteImages, "Fetched favorite Images"));
 });
+
+const favoriteImagesForUser = asyncHandler(async (req, res) => {
+  const user = req.user.userId;
+
+  const images = await Image.find({ userId: user, isFavorite: true });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, images, "Favorite images fetched successfully"));
+});
 export {
   uploadImage,
   favoriteImage,
   updateComment,
   deleteImage,
-  getAllImagesByAlbumId,
-  getFavoriteImages,
-  getAllImagesByUserId,
+  imagesByAlbumId,
+  imagesByUserId,
+  favoriteImagesInAlbum,
+  favoriteImagesForUser,
 };
