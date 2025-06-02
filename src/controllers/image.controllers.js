@@ -64,9 +64,7 @@ const uploadImage = asyncHandler(async (req, res) => {
 });
 
 const favoriteImage = asyncHandler(async (req, res) => {
-  console.log(req.body);
   const { isFavorite } = req.body;
-  console.log(isFavorite);
   const { imageId } = req.params;
   const user = req.user.userId;
   const image = await Image.findOne({ imageId, userId: user });
@@ -74,7 +72,6 @@ const favoriteImage = asyncHandler(async (req, res) => {
   if (!image) {
     throw new ApiError(404, "Image not found");
   }
-
   image.isFavorite = isFavorite;
   await image.save(); // Save the updated document
 
@@ -102,13 +99,16 @@ const updateComment = asyncHandler(async (req, res) => {
 });
 
 const deleteImage = asyncHandler(async (req, res) => {
-  const { imageId } = req.params;
+  const { imageId, userId } = req.params;
 
   if (!imageId) {
     throw new ApiError(400, "Image Id not provided");
   }
 
-  const deletionResult = await Image.deleteOne({ imageId: imageId });
+  const deletionResult = await Image.deleteOne({
+    imageId: imageId,
+    userId: userId,
+  });
 
   if (deletionResult.deletedCount === 0) {
     throw new ApiError(404, "No image found with the given ID");
@@ -123,7 +123,6 @@ const deleteImage = asyncHandler(async (req, res) => {
 
 const imagesByAlbumId = asyncHandler(async (req, res) => {
   const { albumId } = req.params;
-  console.log(albumId);
   if (!albumId) {
     throw new ApiError(400, "Album id is required");
   }

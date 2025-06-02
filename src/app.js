@@ -4,9 +4,19 @@ import cookieParser from "cookie-parser";
 
 import { errorHandler } from "./utils/errorHandler.js";
 const app = express();
-
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://fotive-backend.vercel.app",
+];
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   optionSuccessStatus: 200,
 };

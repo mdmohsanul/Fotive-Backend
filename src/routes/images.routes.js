@@ -23,7 +23,7 @@ router
   .route("/:albumId/images/:imageId/comments")
   .patch(verifyJWT, updateComment);
 
-router.route("/:albumId/images/:imageId").delete(verifyJWT, deleteImage);
+router.route("/:userId/images/:imageId").delete(verifyJWT, deleteImage);
 
 router.route("/:albumId/images").get(verifyJWT, imagesByAlbumId);
 router.route("/user/:userId/images").get(verifyJWT, imagesByUserId);
