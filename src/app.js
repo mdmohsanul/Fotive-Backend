@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
 import { errorHandler } from "./utils/errorHandler.js";
+
 const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
