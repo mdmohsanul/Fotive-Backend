@@ -4,23 +4,27 @@ import cookieParser from "cookie-parser";
 import { errorHandler } from "./utils/errorHandler.js";
 
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5173", // Dev frontend
-  "https://fotive.vercel.app", // Production frontend
-];
+// const allowedOrigins = [
+//   "https://fotive.vercel.app", // Production frontend
+//   "http://localhost:5173", // Dev frontend
+// ];
 
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   credentials: true, // Allow cookies
+//   optionSuccessStatus: 200,
+// };
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true, // Allow cookies
-  optionSuccessStatus: 200,
-};
-
+  origin:"https://fotive.vercel.app",
+  credentials: true, // Allow cookies,
+   optionSuccessStatus: 200,
+}
 
 app.use(cors(corsOptions));
 
