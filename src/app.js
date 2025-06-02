@@ -5,12 +5,12 @@ import { errorHandler } from "./utils/errorHandler.js";
 
 const app = express();
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://fotive-backend.vercel.app",
+  "http://localhost:5173", // Dev frontend
+  "https://fotive.vercel.app", // Production frontend
 ];
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -20,6 +20,7 @@ const corsOptions = {
   credentials: true,
   optionSuccessStatus: 200,
 };
+
 
 app.use(cors(corsOptions));
 
