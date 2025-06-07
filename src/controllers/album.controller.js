@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Image } from "../models/image.model.js";
 
 const createAlbum = asyncHandler(async (req, res) => {
-  const owner = req.user._id;
+  const owner = req.user.userId;
   const { name, description } = req.body;
   if (!name || name.trim() === "") {
     throw new ApiError(401, "Album name is required");
@@ -28,7 +28,7 @@ const createAlbum = asyncHandler(async (req, res) => {
 });
 
 const getAllAlbums = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.userId;
 
   if (!userId) {
     throw new ApiError(400, "User Id not found");
@@ -60,7 +60,6 @@ const updateData = asyncHandler(async (req, res) => {
   if (!album) {
     throw new ApiError(404, "Album not found or unauthorized");
   }
-
 
   return res
     .status(200)
@@ -117,5 +116,38 @@ const deleteAlbum = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Album deleted successfully"));
 });
 
-export { createAlbum, updateData, addUsersToAlbum, deleteAlbum, getAllAlbums };
+const addSharedUserToAlbum = asyncHandler(async (req, res) => {
+  const { albumId } = req.params;
+  const { email } = req.body;
+  const userId = req.user.userId;
+
+  const album = await Album.findOne({ albumId });
+  if (!albumId) {
+    throw new ApiError(404, "Album not found");
+  }
+
+  // only album owner can share
+  if (album.ownerId !== userId) {
+    throw new ApiError(403, "Only owner can share the album");
+  }
+
+  // check if user email is already exists
+  if (album.sharedUsers.includes(email)) {
+    throw new ApiError(401, "Email already in the list");
+  }
+
+  album.sharedUsers.push(email);
+  await album.save();
+
+  res.status(200).json(200, album, "Album shared successfully");
+});
+
+export {
+  createAlbum,
+  updateData,
+  addUsersToAlbum,
+  deleteAlbum,
+  getAllAlbums,
+  addSharedUserToAlbum,
+};
 
