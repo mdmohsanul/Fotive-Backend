@@ -6,6 +6,7 @@ import {
   favoriteImage,
   favoriteImagesForUser,
   favoriteImagesInAlbum,
+  getCommentsForAParticularImage,
   imagesByAlbumId,
   imagesByUserId,
   updateComment,
@@ -17,11 +18,14 @@ const router = Router();
 router
   .route("/:albumId/images")
   .post(verifyJWT, upload.single("image"), uploadImage);
+
 router.route("/images/:imageId/favorite").patch(verifyJWT, favoriteImage);
 
+router.route("/images/:imageId/comment").patch(verifyJWT, updateComment);
 router
-  .route("/:albumId/images/:imageId/comments")
-  .patch(verifyJWT, updateComment);
+  .route("/images/:imageId/comments")
+  .get(verifyJWT, getCommentsForAParticularImage);
+
 
 router.route("/:userId/images/:imageId").delete(verifyJWT, deleteImage);
 

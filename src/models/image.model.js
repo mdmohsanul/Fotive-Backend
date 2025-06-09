@@ -34,11 +34,19 @@ const imageSchema = new mongoose.Schema(
     },
     comments: [
       {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        text: String,
+        user: {
+          type: mongoose.Schema.Types.ObjectId, // UUID stored as string
+          ref: "User", // optional, only needed if you use populate
+          required: true,
+        },
+        text: {
+          type: String,
+          required: true,
+        },
         createdAt: { type: Date, default: Date.now },
       },
     ],
+
     imageUrl: {
       type: String,
       required: true,

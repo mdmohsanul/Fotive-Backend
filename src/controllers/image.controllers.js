@@ -48,15 +48,9 @@ const uploadImage = asyncHandler(async (req, res) => {
     name: originalname.split(".")[0],
     imageUrl: uploadedImage?.url,
     tags,
-    isFavorite: Boolean(isFavorite),
+    isFavorite: isFavorite === "true",
     userId,
     size: size / (1024 * 1024),
-    comments: [
-      {
-        user: req.user._id,
-        text: commentText,
-      },
-    ],
   });
   return res
     .status(201)
@@ -67,52 +61,92 @@ const favoriteImage = asyncHandler(async (req, res) => {
   const { isFavorite } = req.body;
   const { imageId } = req.params;
   const user = req.user.userId;
-  const image = await Image.findOne({ imageId, userId: user });
+  const image = await Image.findOne({ imageId });
 
   if (!image) {
     throw new ApiError(404, "Image not found");
   }
   image.isFavorite = isFavorite;
-  await image.save(); // Save the updated document
+  const updatedfavImage = await image.save(); // Save the updated document
 
   res
     .status(200)
-    .json(new ApiResponse(200, image, "Image favorite status updated"));
+    .json(
+      new ApiResponse(200, updatedfavImage, "Image favorite status updated")
+    );
 });
 
 const updateComment = asyncHandler(async (req, res) => {
   const { comment } = req.body;
   const { imageId } = req.params;
 
+  if (!comment || comment.trim() === "") {
+    throw new ApiError(400, "Comment cannot be empty");
+  }
+
+  if (!req.user?._id) {
+    throw new ApiError(401, "Unauthorized: Missing user ID");
+  }
+
   const image = await Image.findOne({ imageId });
 
   if (!image) {
     throw new ApiError(404, "Image not found");
   }
+
+  // ✅ Push properly formatted comment object
   image.comments.push({
     user: req.user._id,
-    text: comment,
+    text: comment.trim(), // Always good to sanitize
   });
-  await image.save(); // Save the updated document
 
-  res.status(200).json(new ApiResponse(200, image, "comment updated"));
+  const updatedComment = await image.save();
+
+  res.status(200).json(new ApiResponse(200, image, "Comment added"));
+});
+
+const getCommentsForAParticularImage = asyncHandler(async (req, res) => {
+  const { imageId } = req.params;
+
+  const image = await Image.findOne({ imageId }).populate({
+    path: "comments.user",
+    select: "name email avatar", // Only fetch needed fields
+  });
+  if (!image) {
+    throw new ApiError(404, "Image not found");
+  }
+
+  // Optional: sort comments by createdAt (newest first)
+  const comments = image.comments.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, comments, "Comments fetched successfully"));
 });
 
 const deleteImage = asyncHandler(async (req, res) => {
-  const { imageId, userId } = req.params;
+  const { imageId } = req.params;
+  const userId = req.user?.userId; // Authenticated user
 
   if (!imageId) {
-    throw new ApiError(400, "Image Id not provided");
+    throw new ApiError(400, "Image ID not provided");
   }
 
-  const deletionResult = await Image.deleteOne({
-    imageId: imageId,
-    userId: userId,
-  });
+  // Step 1: Find the image and check ownership
+  const image = await Image.findOne({ imageId });
 
-  if (deletionResult.deletedCount === 0) {
+  if (!image) {
     throw new ApiError(404, "No image found with the given ID");
   }
+
+  if (image.userId !== userId) {
+    throw new ApiError(403, "You are not authorized to delete this image");
+  }
+
+  // Step 2: Delete the image
+  await Image.deleteOne({ imageId });
 
   return res
     .status(200)
@@ -120,7 +154,6 @@ const deleteImage = asyncHandler(async (req, res) => {
 });
 
 // get all images for a particular albumId
-
 const imagesByAlbumId = asyncHandler(async (req, res) => {
   const { albumId } = req.params;
   if (!albumId) {
@@ -134,17 +167,30 @@ const imagesByAlbumId = asyncHandler(async (req, res) => {
 
 // getAll images
 const imagesByUserId = asyncHandler(async (req, res) => {
-  const user = req.user.userId;
+  const loggedInUserId = req.user.userId;
+  const loggedInUserEmail = req.user.email;
   const { userId } = req.params;
 
-  if (user !== userId) {
-    throw new ApiError(401, "Login user and the userId sent is different");
+  if (loggedInUserId !== userId) {
+    throw new ApiError(401, "Logged-in user and userId sent are different");
   }
-  const images = await Image.find({ userId: userId });
+
+  // 1. Get all albums shared with this user's email
+  const sharedAlbums = await Album.find({ sharedUsers: loggedInUserEmail });
+  const sharedAlbumIds = sharedAlbums.map((album) => album.albumId);
+
+  // 2. Fetch images:
+  //    a) owned by the user
+  //    b) OR in albums shared with the user
+  const images = await Image.find({
+    $or: [{ userId: userId }, { albumId: { $in: sharedAlbumIds } }],
+  });
 
   return res
     .status(200)
-    .json(new ApiResponse(200, images, "All images fetched successfully"));
+    .json(
+      new ApiResponse(200, images, "All accessible images fetched successfully")
+    );
 });
 
 const favoriteImagesInAlbum = asyncHandler(async (req, res) => {
@@ -176,4 +222,5 @@ export {
   imagesByUserId,
   favoriteImagesInAlbum,
   favoriteImagesForUser,
+  getCommentsForAParticularImage,
 };
