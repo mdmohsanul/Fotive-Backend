@@ -110,7 +110,7 @@ const getCommentsForAParticularImage = asyncHandler(async (req, res) => {
 
   const image = await Image.findOne({ imageId }).populate({
     path: "comments.user",
-    select: "name email avatar", // Only fetch needed fields
+    select: "name email avatar userName", // Only fetch needed fields
   });
   if (!image) {
     throw new ApiError(404, "Image not found");
