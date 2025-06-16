@@ -220,6 +220,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
+    sameSite: "None",
+    path: "/",
   };
   return res
     .status(200)
