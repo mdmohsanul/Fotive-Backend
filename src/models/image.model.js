@@ -35,8 +35,8 @@ const imageSchema = new mongoose.Schema(
     comments: [
       {
         user: {
-          type: mongoose.Schema.Types.ObjectId, // UUID stored as string
-          ref: "User", // optional, only needed if you use populate
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
           required: true,
         },
         text: {

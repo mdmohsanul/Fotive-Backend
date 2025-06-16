@@ -168,7 +168,7 @@ const loginWithGoogle = asyncHandler(async (req, res) => {
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production",
     secure: true,
-    sameSite: "strict",
+    sameSite: "None",
   };
 
   res
